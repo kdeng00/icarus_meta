@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+taglib = { version = "1.0.0" }
 icarus-models = { git = "ssh://git@git.kundeng.us/phoenix/icarus-models.git", tag = "v0.1.14" }
