@@ -9,111 +9,115 @@ pub mod meta_type {
     }
 }
 
-pub mod meta_nouveaou {
-    use super::*;
+pub mod meta_next {
+    use lofty::file::AudioFile;
 
-    pub fn get_meta(t: meta_type::Type, filepath: &String) -> Result<String, std::io::Error> {
-        match t {
-            meta_type::Type::Title => match new_meta(filepath) {
-                Ok(metaa) => match get_val(t, metaa.tags) {
-                    Ok(val) => Ok(val),
-                    Err(err) => Err(err),
-                },
-                Err(err) => Err(err),
-            },
-            meta_type::Type::Artist => match new_meta(filepath) {
-                Ok(metaa) => match get_val(t, metaa.tags) {
-                    Ok(val) => Ok(val),
-                    Err(err) => Err(err),
-                },
-                Err(err) => Err(err),
-            },
-            meta_type::Type::Album => match new_meta(filepath) {
-                Ok(metaa) => match get_val(t, metaa.tags) {
-                    Ok(val) => Ok(val),
-                    Err(err) => Err(err),
-                },
-                Err(err) => Err(err),
-            },
-            meta_type::Type::Genre => match new_meta(filepath) {
-                Ok(metaa) => match get_val(t, metaa.tags) {
-                    Ok(val) => Ok(val),
-                    Err(err) => Err(err),
-                },
-                Err(err) => Err(err),
-            },
-            meta_type::Type::Year => match new_meta(filepath) {
-                Ok(metaa) => match get_val(t, metaa.tags) {
-                    Ok(val) => Ok(val),
-                    Err(err) => Err(err),
-                },
-                Err(err) => Err(err),
-            },
-            meta_type::Type::Track => match new_meta(filepath) {
-                Ok(metaa) => match get_val(t, metaa.tags) {
-                    Ok(val) => Ok(val),
-                    Err(err) => Err(err),
-                },
-                Err(err) => Err(err),
-            },
-        }
-    }
+    use super::*;
 
     fn get_type(t: meta_type::Type) -> Result<String, std::io::Error> {
         match t {
-            meta_type::Type::Title => Ok("TITLE".to_string()),
-            meta_type::Type::Artist => Ok("ARTIST".to_string()),
-            meta_type::Type::Album => Ok("".to_string()),
-            meta_type::Type::Genre => Ok("".to_string()),
-            meta_type::Type::Year => Ok("".to_string()),
-            meta_type::Type::Track => Ok("".to_string()),
+            meta_type::Type::Title => Ok("TITLE".to_owned()),
+            meta_type::Type::Artist => Ok("ARTIST".to_owned()),
+            meta_type::Type::Album => Ok("ALBUM".to_owned()),
+            meta_type::Type::Genre => Ok("GENRE".to_owned()),
+            meta_type::Type::Year => Ok("YEAR".to_owned()),
+            meta_type::Type::Track => Ok("TRACK".to_owned()),
         }
     }
 
-    fn get_val(t: meta_type::Type, tags: Vec<(String, String)>) -> Result<String, std::io::Error> {
-        let type_ma: String = get_type(t).unwrap();
-        for tag in tags {
-            if tag.0 == type_ma {
-                return Ok(tag.1);
+    pub fn get_meta(t: meta_type::Type, filepath: &String) -> Result<String, std::io::Error> {
+        match std::fs::File::open(filepath) {
+            Ok(mut content) => {
+                match lofty::flac::FlacFile::read_from(
+                    &mut content,
+                    lofty::config::ParseOptions::new(),
+                ) {
+                    Ok(flac_file) => match flac_file.vorbis_comments() {
+                        Some(vb) => {
+                            let type_str: String = get_type(t).unwrap();
+                            match vb.get(&type_str) {
+                                Some(val) => Ok(val.to_owned()),
+                                None => Err(std::io::Error::new(
+                                    std::io::ErrorKind::InvalidData,
+                                    "Could not get tag data",
+                                )),
+                            }
+                        }
+                        None => Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidData,
+                            "No tags found",
+                        )),
+                    },
+                    Err(err) => Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        err.to_string(),
+                    )),
+                }
             }
+            Err(err) => Err(err),
         }
-
-        Err(std::io::Error::new(
-            std::io::ErrorKind::InvalidInput,
-            "Invalid",
-        ))
-    }
-
-    fn new_meta(filepath: &String) -> Result<metadata::MediaFileMetadata, std::io::Error> {
-        let path = std::path::Path::new(&filepath);
-        metadata::MediaFileMetadata::new(&path)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use util::{file_exists, get_full_path};
+
     use super::*;
+
+    mod util {
+        pub fn get_full_path(
+            directory: &String,
+            filename: &String,
+        ) -> Result<String, std::io::Error> {
+            match path_buf(directory, filename) {
+                Ok(pf) => Ok(pf.display().to_string()),
+                Err(err) => Err(err),
+            }
+        }
+
+        pub fn file_exists(directory: &String, filename: &String) -> Result<bool, std::io::Error> {
+            match path_buf(directory, filename) {
+                Ok(pf) => Ok(pf.exists()),
+                Err(err) => Err(err),
+            }
+        }
+
+        fn path_buf(
+            directory: &String,
+            filename: &String,
+        ) -> Result<std::path::PathBuf, std::io::Error> {
+            let dir_path = std::path::Path::new(&directory);
+            Ok(dir_path.join(filename))
+        }
+
+        pub fn test_file_directory() -> String {
+            String::from("tests/sample_tracks3")
+        }
+    }
 
     #[test]
     fn test_get_title() {
         let filename = String::from("track01.flac");
-        let dir = String::from("tests/sample_tracks3");
-        let dir_path = std::path::Path::new(&dir);
-        let full_path = dir_path.join(filename);
+        let dir = util::test_file_directory();
 
-        println!("Path: {:?}", full_path);
+        match file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = get_full_path(&dir, &filename).unwrap();
 
-        assert!(full_path.exists(), "Path does not exists {:?}", full_path);
-        let filepath = full_path.display().to_string();
-
-        match meta_nouveaou::get_meta(meta_type::Type::Title, &filepath) {
-            Ok(title) => {
-                let found = title == "Just roll it";
-                assert!(found, "Meta information was not found {:?}", title);
+                match meta_next::get_meta(meta_type::Type::Title, &filepath) {
+                    Ok(title) => {
+                        let found = title == "Just roll it";
+                        assert!(found, "Meta information was not found {:?}", title);
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {:?}", err);
+                    }
+                }
             }
             Err(err) => {
-                assert!(false, "Error: {:?}", err);
+                assert!(false, "Error: File does not exist {:?}", err.to_string());
             }
-        }
+        };
     }
 }
