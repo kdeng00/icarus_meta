@@ -11,22 +11,6 @@ on:
       - devel
 
 jobs:
-  install_dependencies:
-    # runs-on: ubuntu-latest # Or similar Debian/Ubuntu based runner
-    runs-on: ubuntu-24.04
-    container: rust:1.86.0 # Example using the official Rust image (Debian based)
-    steps:
-      - name: Install FFmpeg development libraries
-        run: |
-          apt-get update -y
-          apt-get install -y --no-install-recommends \
-            libavutil-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libswscale-dev \
-            # Add other ffmpeg dev packages if needed by your specific crate
-          rm -rf /var/lib/apt/lists/* # Clean up
-
   check:
     name: Check
     runs-on: ubuntu-24.04
@@ -117,4 +101,3 @@ jobs:
           eval $(ssh-agent -s)
           ssh-add -v ~/.ssh/gitlab_deploy_key
           cargo build --release
-
