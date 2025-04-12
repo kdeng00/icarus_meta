@@ -5,5 +5,5 @@ edition = "2024"
 rust-version = "1.86"
 
 [dependencies]
-taglib = { version = "1.0.0" }
+metadata = { version = "0.1.10" }
 icarus_models = { git = "ssh://git@git.kundeng.us/phoenix/icarus_models.git", tag = "v0.4.3" }
