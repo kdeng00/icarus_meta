@@ -4,7 +4,7 @@ pub mod meta_type {
         Artist,
         Album,
         Genre,
-        Year,
+        Date,
         Track,
     }
 }
@@ -20,7 +20,7 @@ pub mod meta_next {
             meta_type::Type::Artist => Ok("ARTIST".to_owned()),
             meta_type::Type::Album => Ok("ALBUM".to_owned()),
             meta_type::Type::Genre => Ok("GENRE".to_owned()),
-            meta_type::Type::Year => Ok("DATE".to_owned()),
+            meta_type::Type::Date => Ok("DATE".to_owned()),
             meta_type::Type::Track => Ok("TRACKNUMBER".to_owned()),
         }
     }
@@ -202,7 +202,7 @@ mod tests {
             Ok(_) => {
                 let filepath = get_full_path(&dir, &filename).unwrap();
 
-                match meta_next::get_meta(meta_type::Type::Year, &filepath) {
+                match meta_next::get_meta(meta_type::Type::Date, &filepath) {
                     Ok(year) => {
                         let found = year == "2025-04-11";
                         assert!(found, "Meta information was not found {:?}", year);
