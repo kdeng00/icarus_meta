@@ -20,8 +20,8 @@ pub mod meta_next {
             meta_type::Type::Artist => Ok("ARTIST".to_owned()),
             meta_type::Type::Album => Ok("ALBUM".to_owned()),
             meta_type::Type::Genre => Ok("GENRE".to_owned()),
-            meta_type::Type::Year => Ok("YEAR".to_owned()),
-            meta_type::Type::Track => Ok("TRACK".to_owned()),
+            meta_type::Type::Year => Ok("DATE".to_owned()),
+            meta_type::Type::Track => Ok("TRACKNUMBER".to_owned()),
         }
     }
 
@@ -34,6 +34,7 @@ pub mod meta_next {
                 ) {
                     Ok(flac_file) => match flac_file.vorbis_comments() {
                         Some(vb) => {
+                            println!("Info: {:?}", vb);
                             let type_str: String = get_type(t).unwrap();
                             match vb.get(&type_str) {
                                 Some(val) => Ok(val.to_owned()),
@@ -109,6 +110,126 @@ mod tests {
                     Ok(title) => {
                         let found = title == "Just roll it";
                         assert!(found, "Meta information was not found {:?}", title);
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {:?}", err);
+                    }
+                }
+            }
+            Err(err) => {
+                assert!(false, "Error: File does not exist {:?}", err.to_string());
+            }
+        };
+    }
+    #[test]
+    fn test_get_artist() {
+        let filename = String::from("track01.flac");
+        let dir = util::test_file_directory();
+
+        match file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = get_full_path(&dir, &filename).unwrap();
+
+                match meta_next::get_meta(meta_type::Type::Artist, &filepath) {
+                    Ok(artist) => {
+                        let found = artist == "KD";
+                        assert!(found, "Meta information was not found {:?}", artist);
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {:?}", err);
+                    }
+                }
+            }
+            Err(err) => {
+                assert!(false, "Error: File does not exist {:?}", err.to_string());
+            }
+        };
+    }
+    #[test]
+    fn test_get_album() {
+        let filename = String::from("track01.flac");
+        let dir = util::test_file_directory();
+
+        match file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = get_full_path(&dir, &filename).unwrap();
+
+                match meta_next::get_meta(meta_type::Type::Album, &filepath) {
+                    Ok(album) => {
+                        let found = album == "Sample Tracks 3";
+                        assert!(found, "Meta information was not found {:?}", album);
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {:?}", err);
+                    }
+                }
+            }
+            Err(err) => {
+                assert!(false, "Error: File does not exist {:?}", err.to_string());
+            }
+        };
+    }
+    #[test]
+    fn test_get_genre() {
+        let filename = String::from("track01.flac");
+        let dir = util::test_file_directory();
+
+        match file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = get_full_path(&dir, &filename).unwrap();
+
+                match meta_next::get_meta(meta_type::Type::Genre, &filepath) {
+                    Ok(genre) => {
+                        let found = genre == "Metal";
+                        assert!(found, "Meta information was not found {:?}", genre);
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {:?}", err);
+                    }
+                }
+            }
+            Err(err) => {
+                assert!(false, "Error: File does not exist {:?}", err.to_string());
+            }
+        };
+    }
+    #[test]
+    fn test_get_year() {
+        let filename = String::from("track01.flac");
+        let dir = util::test_file_directory();
+
+        match file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = get_full_path(&dir, &filename).unwrap();
+
+                match meta_next::get_meta(meta_type::Type::Year, &filepath) {
+                    Ok(year) => {
+                        let found = year == "2025-04-11";
+                        assert!(found, "Meta information was not found {:?}", year);
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {:?}", err);
+                    }
+                }
+            }
+            Err(err) => {
+                assert!(false, "Error: File does not exist {:?}", err.to_string());
+            }
+        };
+    }
+    #[test]
+    fn test_get_track() {
+        let filename = String::from("track01.flac");
+        let dir = util::test_file_directory();
+
+        match file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = get_full_path(&dir, &filename).unwrap();
+
+                match meta_next::get_meta(meta_type::Type::Track, &filepath) {
+                    Ok(track) => {
+                        let found = track == "1";
+                        assert!(found, "Meta information was not found {:?}", track);
                     }
                     Err(err) => {
                         assert!(false, "Error: {:?}", err);
