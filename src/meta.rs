@@ -7,9 +7,11 @@ fn get_type(t: types::Type) -> Result<String, std::io::Error> {
         types::Type::Title => Ok("TITLE".to_owned()),
         types::Type::Artist => Ok("ARTIST".to_owned()),
         types::Type::Album => Ok("ALBUM".to_owned()),
+        types::Type::AlbumArtist => Ok("ALBUMARTIST".to_owned()),
         types::Type::Genre => Ok("GENRE".to_owned()),
         types::Type::Date => Ok("DATE".to_owned()),
         types::Type::Track => Ok("TRACKNUMBER".to_owned()),
+        types::Type::Disc => Ok("DISCNUMBER".to_owned()),
     }
 }
 
@@ -76,15 +78,28 @@ mod tests {
             Ok(dir_path.join(filename))
         }
 
-        pub fn test_file_directory() -> String {
-            String::from("tests/sample_tracks3")
+        pub const TESTFILEDIRECTORY: &str = "tests/sample_tracks3";
+
+        pub fn get_filename(track: i32) -> String {
+            let mut filename = String::from("track");
+
+            if track < 10 {
+                filename += "0";
+                filename += &track.to_string();
+            } else {
+                filename += &track.to_string();
+            }
+
+            filename += ".flac";
+
+            filename
         }
     }
 
     #[test]
     fn test_get_title() {
-        let filename = String::from("track01.flac");
-        let dir = util::test_file_directory();
+        let filename = util::get_filename(1);
+        let dir = String::from(util::TESTFILEDIRECTORY);
 
         match file_exists(&dir, &filename) {
             Ok(_) => {
@@ -105,10 +120,11 @@ mod tests {
             }
         };
     }
+
     #[test]
     fn test_get_artist() {
-        let filename = String::from("track01.flac");
-        let dir = util::test_file_directory();
+        let filename = util::get_filename(1);
+        let dir = String::from(util::TESTFILEDIRECTORY);
 
         match file_exists(&dir, &filename) {
             Ok(_) => {
@@ -129,10 +145,11 @@ mod tests {
             }
         };
     }
+
     #[test]
     fn test_get_album() {
-        let filename = String::from("track01.flac");
-        let dir = util::test_file_directory();
+        let filename = util::get_filename(1);
+        let dir = String::from(util::TESTFILEDIRECTORY);
 
         match file_exists(&dir, &filename) {
             Ok(_) => {
@@ -153,10 +170,36 @@ mod tests {
             }
         };
     }
+
+    #[test]
+    fn test_get_album_artist() {
+        let filename = util::get_filename(1);
+        let dir = String::from(util::TESTFILEDIRECTORY);
+
+        match file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = get_full_path(&dir, &filename).unwrap();
+
+                match get_meta(types::Type::AlbumArtist, &filepath) {
+                    Ok(album_artist) => {
+                        let found = album_artist == "KD";
+                        assert!(found, "Meta information was not found {:?}", album_artist);
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {:?}", err);
+                    }
+                }
+            }
+            Err(err) => {
+                assert!(false, "Error: File does not exist {:?}", err.to_string());
+            }
+        };
+    }
+
     #[test]
     fn test_get_genre() {
-        let filename = String::from("track01.flac");
-        let dir = util::test_file_directory();
+        let filename = util::get_filename(1);
+        let dir = String::from(util::TESTFILEDIRECTORY);
 
         match file_exists(&dir, &filename) {
             Ok(_) => {
@@ -179,17 +222,17 @@ mod tests {
     }
     #[test]
     fn test_get_year() {
-        let filename = String::from("track01.flac");
-        let dir = util::test_file_directory();
+        let filename = util::get_filename(1);
+        let dir = String::from(util::TESTFILEDIRECTORY);
 
         match file_exists(&dir, &filename) {
             Ok(_) => {
                 let filepath = get_full_path(&dir, &filename).unwrap();
 
                 match get_meta(types::Type::Date, &filepath) {
-                    Ok(year) => {
-                        let found = year == "2025-04-11";
-                        assert!(found, "Meta information was not found {:?}", year);
+                    Ok(date) => {
+                        let found = date == "2025-04-11";
+                        assert!(found, "Meta information was not found {:?}", date);
                     }
                     Err(err) => {
                         assert!(false, "Error: {:?}", err);
@@ -201,10 +244,11 @@ mod tests {
             }
         };
     }
+
     #[test]
     fn test_get_track() {
-        let filename = String::from("track01.flac");
-        let dir = util::test_file_directory();
+        let filename = util::get_filename(1);
+        let dir = String::from(util::TESTFILEDIRECTORY);
 
         match file_exists(&dir, &filename) {
             Ok(_) => {
@@ -214,6 +258,31 @@ mod tests {
                     Ok(track) => {
                         let found = track == "1";
                         assert!(found, "Meta information was not found {:?}", track);
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {:?}", err);
+                    }
+                }
+            }
+            Err(err) => {
+                assert!(false, "Error: File does not exist {:?}", err.to_string());
+            }
+        };
+    }
+
+    #[test]
+    fn test_get_disc() {
+        let filename = util::get_filename(1);
+        let dir = String::from(util::TESTFILEDIRECTORY);
+
+        match file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = get_full_path(&dir, &filename).unwrap();
+
+                match get_meta(types::Type::Disc, &filepath) {
+                    Ok(disc) => {
+                        let found = disc == "1";
+                        assert!(found, "Meta information was not found {:?}", disc);
                     }
                     Err(err) => {
                         assert!(false, "Error: {:?}", err);
