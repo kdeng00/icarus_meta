@@ -15,6 +15,81 @@ fn get_type(t: types::Type) -> Result<String, std::io::Error> {
     }
 }
 
+pub mod coverart {
+
+    use lofty::{file::AudioFile, ogg::OggPictureStorage};
+
+    pub fn set_coverart(
+        song_filepath: &String,
+        coverart_filepath: &String,
+    ) -> Result<Vec<u8>, std::io::Error> {
+        let coverart_path = std::path::Path::new(coverart_filepath);
+
+        match std::fs::File::open(song_filepath) {
+            Ok(mut file) => {
+                match lofty::flac::FlacFile::read_from(
+                    &mut file,
+                    lofty::config::ParseOptions::new(),
+                ) {
+                    Ok(mut flac_file) => {
+                        let mut coverart_file = std::fs::File::open(coverart_path).unwrap();
+                        match lofty::picture::Picture::from_reader(&mut coverart_file) {
+                            Ok(pic) => {
+                                match lofty::picture::PictureInformation::from_picture(&pic) {
+                                    Ok(info) => {
+                                        flac_file.set_picture(0, pic.clone(), info);
+                                        Ok(pic.into_data())
+                                    }
+                                    Err(err) => Err(std::io::Error::new(
+                                        std::io::ErrorKind::InvalidData,
+                                        err.to_string(),
+                                    )),
+                                }
+                            }
+                            Err(err) => Err(std::io::Error::new(
+                                std::io::ErrorKind::InvalidData,
+                                err.to_string(),
+                            )),
+                        }
+                    }
+                    Err(err) => Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        err.to_string(),
+                    )),
+                }
+            }
+            Err(err) => Err(err),
+        }
+    }
+
+    pub fn get_coverart(song_filepath: &String) -> Result<Vec<u8>, std::io::Error> {
+        match std::fs::File::open(song_filepath) {
+            Ok(mut file) => {
+                match lofty::flac::FlacFile::read_from(
+                    &mut file,
+                    lofty::config::ParseOptions::new(),
+                ) {
+                    Ok(flac_file) => {
+                        let pictures = flac_file.pictures();
+                        let res = pictures.to_vec();
+                        if !res.is_empty() {
+                            let picture = &res[0];
+                            Ok(picture.clone().0.into_data())
+                        } else {
+                            Ok(Vec::new())
+                        }
+                    }
+                    Err(err) => Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        err.to_string(),
+                    )),
+                }
+            }
+            Err(err) => Err(err),
+        }
+    }
+}
+
 pub fn get_meta(t: types::Type, filepath: &String) -> Result<String, std::io::Error> {
     match std::fs::File::open(filepath) {
         Ok(mut content) => {
@@ -109,6 +184,19 @@ mod tests {
     use super::*;
 
     mod util {
+
+        use std::io::{self, Write};
+
+        // Function to save a Vec<u8> to a file
+        pub fn save_bytes_to_file(bytes: &[u8], file_path: &String) -> io::Result<()> {
+            let file = std::path::Path::new(file_path);
+            let mut file = std::fs::File::create(file)?;
+
+            match file.write_all(bytes) {
+                Ok(_res) => Ok(()),
+                Err(err) => Err(err),
+            }
+        }
         pub fn get_full_path(
             directory: &String,
             filename: &String,
@@ -780,6 +868,76 @@ mod tests {
                             );
                         }
                     };
+                }
+                Err(err) => {
+                    assert!(false, "Error: File does not exist {:?}", err.to_string());
+                }
+            };
+        }
+    }
+
+    mod pictures {
+
+        use super::*;
+
+        #[test]
+        fn test_get_picture() {
+            let filename = util::get_filename(1);
+            let dir = String::from(util::TESTFILEDIRECTORY);
+
+            let temp_file = tempfile::tempdir().expect("Could not create test directory");
+            let test_dir = String::from(temp_file.path().to_str().unwrap());
+
+            match file_exists(&dir, &filename) {
+                Ok(_) => {
+                    let filepath = get_full_path(&dir, &filename).unwrap();
+
+                    match coverart::get_coverart(&filepath) {
+                        Ok(coverart) => {
+                            let is_empty = coverart.is_empty();
+                            assert_eq!(is_empty, false, "Should not be empty");
+
+                            let mut new_coverart_path: String = test_dir.clone();
+                            new_coverart_path += &String::from("/newcovvv.png");
+                            let _ = util::save_bytes_to_file(&coverart, &new_coverart_path);
+                            let created_file = std::path::Path::new(&new_coverart_path);
+                            assert!(
+                                created_file.exists(),
+                                "Error: {:?} has not been created",
+                                new_coverart_path
+                            );
+                        }
+                        Err(err) => {
+                            assert!(false, "Error: {:?}", err.to_string());
+                        }
+                    }
+                }
+                Err(err) => {
+                    assert!(false, "Error: File does not exist {:?}", err.to_string());
+                }
+            };
+        }
+
+        #[test]
+        fn test_set_picture() {
+            let filename = util::get_filename(1);
+            let dir = String::from(util::TESTFILEDIRECTORY);
+
+            let new_coverart = String::from("Sample Tracks 3 - Other one.png");
+            let new_cover_art_path = get_full_path(&dir, &new_coverart).unwrap();
+
+            match file_exists(&dir, &filename) {
+                Ok(_) => {
+                    let filepath = get_full_path(&dir, &filename).unwrap();
+
+                    match coverart::set_coverart(&filepath, &new_cover_art_path) {
+                        Ok(bytes) => {
+                            assert_eq!(false, bytes.is_empty(), "This should not be empty");
+                        }
+                        Err(err) => {
+                            assert!(false, "Error: {:?}", err);
+                        }
+                    }
                 }
                 Err(err) => {
                     assert!(false, "Error: File does not exist {:?}", err.to_string());
