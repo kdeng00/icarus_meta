@@ -7,6 +7,8 @@ pub enum Type {
     Date,
     Track,
     Disc,
+    TrackCount,
+    DiscCount,
 }
 
 pub mod access {
@@ -21,6 +23,8 @@ pub mod access {
             super::Type::Date => Ok("DATE".to_owned()),
             super::Type::Track => Ok("TRACKNUMBER".to_owned()),
             super::Type::Disc => Ok("DISCNUMBER".to_owned()),
+            super::Type::TrackCount => Ok("TRACKCOUNT".to_owned()),
+            super::Type::DiscCount => Ok("DISCCOUNT".to_owned()),
         }
     }
 }

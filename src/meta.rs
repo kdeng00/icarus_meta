@@ -211,6 +211,12 @@ pub mod metadata {
                                 types::Type::Track => {
                                     vb.set_track(pre_value.parse().unwrap());
                                 }
+                                types::Type::TrackCount => {
+                                    vb.set_track_total(pre_value.parse().unwrap());
+                                }
+                                types::Type::DiscCount => {
+                                    vb.set_disk_total(pre_value.parse().unwrap());
+                                }
                             };
 
                             Ok(value.to_owned())
@@ -499,6 +505,56 @@ mod tests {
                         Ok(disc) => {
                             let found = disc == "1";
                             assert!(found, "Meta information was not found {:?}", disc);
+                        }
+                        Err(err) => {
+                            assert!(false, "Error: {:?}", err);
+                        }
+                    }
+                }
+                Err(err) => {
+                    assert!(false, "Error: File does not exist {:?}", err.to_string());
+                }
+            };
+        }
+
+        #[test]
+        fn test_get_track_total() {
+            let filename = util::get_filename(1);
+            let dir = String::from(util::TESTFILEDIRECTORY);
+
+            match file_exists(&dir, &filename) {
+                Ok(_) => {
+                    let filepath = get_full_path(&dir, &filename).unwrap();
+
+                    match get_meta(types::Type::TrackCount, &filepath) {
+                        Ok(track_total) => {
+                            let found = track_total == "3";
+                            assert!(found, "Meta information was not found {:?}", track_total);
+                        }
+                        Err(err) => {
+                            assert!(false, "Error: {:?}", err);
+                        }
+                    }
+                }
+                Err(err) => {
+                    assert!(false, "Error: File does not exist {:?}", err.to_string());
+                }
+            };
+        }
+
+        #[test]
+        fn test_get_disc_total() {
+            let filename = util::get_filename(1);
+            let dir = String::from(util::TESTFILEDIRECTORY);
+
+            match file_exists(&dir, &filename) {
+                Ok(_) => {
+                    let filepath = get_full_path(&dir, &filename).unwrap();
+
+                    match get_meta(types::Type::DiscCount, &filepath) {
+                        Ok(disc_total) => {
+                            let found = disc_total == "1";
+                            assert!(found, "Meta information was not found {:?}", disc_total);
                         }
                         Err(err) => {
                             assert!(false, "Error: {:?}", err);
@@ -879,6 +935,121 @@ mod tests {
                 }
             };
         }
+
+        #[test]
+        fn test_set_track_total() {
+            let filename = util::get_filename(1);
+            let dir = String::from(util::TESTFILEDIRECTORY);
+
+            let temp_file = tempfile::tempdir().expect("Could not create test directory");
+            let test_dir = String::from(temp_file.path().to_str().unwrap());
+            let test_filename = String::from("track08.flac");
+            let new_filepath = test_dir + "/" + &test_filename;
+
+            match file_exists(&dir, &filename) {
+                Ok(_) => {
+                    let filepath = get_full_path(&dir, &filename).unwrap();
+
+                    match util::copy_file(&filepath, &new_filepath) {
+                        Ok(_o) => match get_meta(types::Type::TrackCount, &filepath) {
+                            Ok(track_total) => {
+                                let found = track_total == "3";
+                                assert!(found, "Meta information was not found {:?}", track_total);
+                                let new_track_total = String::from("5");
+
+                                match set_meta(
+                                    types::Type::TrackCount,
+                                    &new_filepath,
+                                    &new_track_total,
+                                ) {
+                                    Ok(m) => {
+                                        assert_eq!(
+                                            new_track_total, m,
+                                            "New track does not match {:?}",
+                                            m
+                                        );
+                                    }
+                                    Err(err) => {
+                                        assert!(false, "Error: {:?}", err);
+                                    }
+                                }
+                            }
+                            Err(err) => {
+                                assert!(false, "Error: {:?}", err);
+                            }
+                        },
+                        Err(err) => {
+                            assert!(
+                                false,
+                                "Error: {:?} source {:?} destination {:?}",
+                                err, filepath, new_filepath
+                            );
+                        }
+                    };
+                }
+                Err(err) => {
+                    assert!(false, "Error: File does not exist {:?}", err.to_string());
+                }
+            };
+        }
+
+        #[test]
+        fn test_set_disc_total() {
+            let filename = util::get_filename(1);
+            let dir = String::from(util::TESTFILEDIRECTORY);
+
+            let temp_file = tempfile::tempdir().expect("Could not create test directory");
+            let test_dir = String::from(temp_file.path().to_str().unwrap());
+            let test_filename = String::from("track08.flac");
+            let new_filepath = test_dir + "/" + &test_filename;
+
+            match file_exists(&dir, &filename) {
+                Ok(_) => {
+                    let filepath = get_full_path(&dir, &filename).unwrap();
+
+                    match util::copy_file(&filepath, &new_filepath) {
+                        Ok(_o) => match get_meta(types::Type::DiscCount, &filepath) {
+                            Ok(disc_total) => {
+                                let found = disc_total == "1";
+                                assert!(found, "Meta information was not found {:?}", disc_total);
+                                let new_disc_total = String::from("2");
+
+                                match set_meta(
+                                    types::Type::DiscCount,
+                                    &new_filepath,
+                                    &new_disc_total,
+                                ) {
+                                    Ok(m) => {
+                                        assert_eq!(
+                                            new_disc_total, m,
+                                            "New disc_total does not match {:?}",
+                                            m
+                                        );
+                                    }
+                                    Err(err) => {
+                                        assert!(false, "Error: {:?}", err);
+                                    }
+                                }
+                            }
+                            Err(err) => {
+                                assert!(false, "Error: {:?}", err);
+                            }
+                        },
+                        Err(err) => {
+                            assert!(
+                                false,
+                                "Error: {:?} source {:?} destination {:?}",
+                                err, filepath, new_filepath
+                            );
+                        }
+                    };
+                }
+                Err(err) => {
+                    assert!(false, "Error: File does not exist {:?}", err.to_string());
+                }
+            };
+        }
+
         #[test]
         fn test_set_genre() {
             let filename = util::get_filename(1);
