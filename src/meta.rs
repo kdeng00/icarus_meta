@@ -88,6 +88,36 @@ pub mod coverart {
             Err(err) => Err(err),
         }
     }
+
+    pub fn contains_coverart(song_filepath: &String) -> Result<(bool, usize), std::io::Error> {
+        match std::fs::File::open(song_filepath) {
+            Ok(mut file) => {
+                match lofty::flac::FlacFile::read_from(
+                    &mut file,
+                    lofty::config::ParseOptions::new(),
+                ) {
+                    Ok(flac_file) => {
+                        let pictures = flac_file.pictures();
+                        if pictures.is_empty() {
+                            Ok((false, 0))
+                        } else {
+                            let res = pictures.to_vec();
+                            if res.is_empty() {
+                                Ok((false, 0))
+                            } else {
+                                Ok((true, res.len()))
+                            }
+                        }
+                    }
+                    Err(err) => Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        err.to_string(),
+                    )),
+                }
+            }
+            Err(err) => Err(err),
+        }
+    }
 }
 
 pub fn get_meta(t: types::Type, filepath: &String) -> Result<String, std::io::Error> {
@@ -933,6 +963,31 @@ mod tests {
                     match coverart::set_coverart(&filepath, &new_cover_art_path) {
                         Ok(bytes) => {
                             assert_eq!(false, bytes.is_empty(), "This should not be empty");
+                        }
+                        Err(err) => {
+                            assert!(false, "Error: {:?}", err);
+                        }
+                    }
+                }
+                Err(err) => {
+                    assert!(false, "Error: File does not exist {:?}", err.to_string());
+                }
+            };
+        }
+
+        #[test]
+        fn test_picture_exists() {
+            let filename = util::get_filename(1);
+            let dir = String::from(util::TESTFILEDIRECTORY);
+
+            match file_exists(&dir, &filename) {
+                Ok(_) => {
+                    let filepath = get_full_path(&dir, &filename).unwrap();
+
+                    match coverart::contains_coverart(&filepath) {
+                        Ok((exists, pictures)) => {
+                            assert!(exists, "File should have a cover art");
+                            assert!((pictures > 0), "No cover art was found in the file");
                         }
                         Err(err) => {
                             assert!(false, "Error: {:?}", err);
