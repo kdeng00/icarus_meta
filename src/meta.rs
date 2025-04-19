@@ -1,20 +1,3 @@
-use lofty::{file::AudioFile, tag::Accessor};
-
-use crate::types;
-
-fn get_type(t: types::Type) -> Result<String, std::io::Error> {
-    match t {
-        types::Type::Title => Ok("TITLE".to_owned()),
-        types::Type::Artist => Ok("ARTIST".to_owned()),
-        types::Type::Album => Ok("ALBUM".to_owned()),
-        types::Type::AlbumArtist => Ok("ALBUMARTIST".to_owned()),
-        types::Type::Genre => Ok("GENRE".to_owned()),
-        types::Type::Date => Ok("DATE".to_owned()),
-        types::Type::Track => Ok("TRACKNUMBER".to_owned()),
-        types::Type::Disc => Ok("DISCNUMBER".to_owned()),
-    }
-}
-
 pub mod coverart {
 
     use lofty::{file::AudioFile, ogg::OggPictureStorage};
@@ -151,90 +134,100 @@ pub mod coverart {
     }
 }
 
-pub fn get_meta(t: types::Type, filepath: &String) -> Result<String, std::io::Error> {
-    match std::fs::File::open(filepath) {
-        Ok(mut content) => {
-            match lofty::flac::FlacFile::read_from(&mut content, lofty::config::ParseOptions::new())
-            {
-                Ok(flac_file) => match flac_file.vorbis_comments() {
-                    Some(vb) => {
-                        let type_str: String = get_type(t).unwrap();
-                        match vb.get(&type_str) {
-                            Some(val) => Ok(val.to_owned()),
-                            None => Err(std::io::Error::new(
-                                std::io::ErrorKind::InvalidData,
-                                "Could not get tag data",
-                            )),
+pub mod metadata {
+    use crate::types;
+    use lofty::file::AudioFile;
+    use lofty::tag::Accessor;
+
+    pub fn get_meta(t: types::Type, filepath: &String) -> Result<String, std::io::Error> {
+        match std::fs::File::open(filepath) {
+            Ok(mut content) => {
+                match lofty::flac::FlacFile::read_from(
+                    &mut content,
+                    lofty::config::ParseOptions::new(),
+                ) {
+                    Ok(flac_file) => match flac_file.vorbis_comments() {
+                        Some(vb) => {
+                            let type_str: String = types::access::get_type(t).unwrap();
+                            match vb.get(&type_str) {
+                                Some(val) => Ok(val.to_owned()),
+                                None => Err(std::io::Error::new(
+                                    std::io::ErrorKind::InvalidData,
+                                    "Could not get tag data",
+                                )),
+                            }
                         }
-                    }
-                    None => Err(std::io::Error::new(
+                        None => Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidData,
+                            "No tags found",
+                        )),
+                    },
+                    Err(err) => Err(std::io::Error::new(
                         std::io::ErrorKind::InvalidData,
-                        "No tags found",
+                        err.to_string(),
                     )),
-                },
-                Err(err) => Err(std::io::Error::new(
-                    std::io::ErrorKind::InvalidData,
-                    err.to_string(),
-                )),
+                }
             }
+            Err(err) => Err(err),
         }
-        Err(err) => Err(err),
     }
-}
 
-pub fn set_meta(
-    t: types::Type,
-    filepath: &String,
-    value: &String,
-) -> Result<String, std::io::Error> {
-    match std::fs::File::open(filepath) {
-        Ok(mut content) => {
-            match lofty::flac::FlacFile::read_from(&mut content, lofty::config::ParseOptions::new())
-            {
-                Ok(mut flac_file) => match flac_file.vorbis_comments_mut() {
-                    Some(vb) => {
-                        let pre_value = value.clone();
-                        match t {
-                            types::Type::Album => {
-                                vb.set_album(pre_value);
-                            }
-                            types::Type::AlbumArtist => {
-                                vb.insert(get_type(t).unwrap(), pre_value);
-                            }
-                            types::Type::Artist => {
-                                vb.set_artist(pre_value);
-                            }
-                            types::Type::Date => {
-                                vb.insert(get_type(t).unwrap(), pre_value);
-                            }
-                            types::Type::Disc => {
-                                vb.set_disk(pre_value.parse().unwrap());
-                            }
-                            types::Type::Genre => {
-                                vb.set_genre(pre_value);
-                            }
-                            types::Type::Title => {
-                                vb.set_title(pre_value);
-                            }
-                            types::Type::Track => {
-                                vb.set_track(pre_value.parse().unwrap());
-                            }
-                        };
+    pub fn set_meta(
+        t: types::Type,
+        filepath: &String,
+        value: &String,
+    ) -> Result<String, std::io::Error> {
+        match std::fs::File::open(filepath) {
+            Ok(mut content) => {
+                match lofty::flac::FlacFile::read_from(
+                    &mut content,
+                    lofty::config::ParseOptions::new(),
+                ) {
+                    Ok(mut flac_file) => match flac_file.vorbis_comments_mut() {
+                        Some(vb) => {
+                            let pre_value = value.clone();
+                            match t {
+                                types::Type::Album => {
+                                    vb.set_album(pre_value);
+                                }
+                                types::Type::AlbumArtist => {
+                                    vb.insert(types::access::get_type(t).unwrap(), pre_value);
+                                }
+                                types::Type::Artist => {
+                                    vb.set_artist(pre_value);
+                                }
+                                types::Type::Date => {
+                                    vb.insert(types::access::get_type(t).unwrap(), pre_value);
+                                }
+                                types::Type::Disc => {
+                                    vb.set_disk(pre_value.parse().unwrap());
+                                }
+                                types::Type::Genre => {
+                                    vb.set_genre(pre_value);
+                                }
+                                types::Type::Title => {
+                                    vb.set_title(pre_value);
+                                }
+                                types::Type::Track => {
+                                    vb.set_track(pre_value.parse().unwrap());
+                                }
+                            };
 
-                        Ok(value.to_owned())
-                    }
-                    None => Err(std::io::Error::new(
+                            Ok(value.to_owned())
+                        }
+                        None => Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidData,
+                            "No tags found",
+                        )),
+                    },
+                    Err(err) => Err(std::io::Error::new(
                         std::io::ErrorKind::InvalidData,
-                        "No tags found",
+                        err.to_string(),
                     )),
-                },
-                Err(err) => Err(std::io::Error::new(
-                    std::io::ErrorKind::InvalidData,
-                    err.to_string(),
-                )),
+                }
             }
+            Err(err) => Err(err),
         }
-        Err(err) => Err(err),
     }
 }
 
@@ -315,6 +308,7 @@ mod tests {
     }
 
     mod get {
+        use super::metadata::get_meta;
         use super::*;
         use crate::types;
 
@@ -519,7 +513,9 @@ mod tests {
     }
 
     mod set {
+        use super::metadata::{get_meta, set_meta};
         use super::*;
+        use crate::types;
 
         #[test]
         fn test_set_title() {
