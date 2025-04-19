@@ -118,6 +118,37 @@ pub mod coverart {
             Err(err) => Err(err),
         }
     }
+
+    pub fn remove_coverart(song_filepath: &String) -> Result<Vec<u8>, std::io::Error> {
+        match std::fs::File::open(song_filepath) {
+            Ok(mut file) => {
+                match lofty::flac::FlacFile::read_from(
+                    &mut file,
+                    lofty::config::ParseOptions::new(),
+                ) {
+                    Ok(mut flac_file) => {
+                        let pictures = flac_file.pictures();
+                        let res = pictures.to_vec();
+                        if !res.is_empty() {
+                            let picture = &res[0];
+                            flac_file.remove_picture(0);
+                            Ok(picture.clone().0.into_data())
+                        } else {
+                            Err(std::io::Error::new(
+                                std::io::ErrorKind::NotFound,
+                                "No pictures found",
+                            ))
+                        }
+                    }
+                    Err(err) => Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        err.to_string(),
+                    )),
+                }
+            }
+            Err(err) => Err(err),
+        }
+    }
 }
 
 pub fn get_meta(t: types::Type, filepath: &String) -> Result<String, std::io::Error> {
@@ -989,6 +1020,40 @@ mod tests {
                             assert!(exists, "File should have a cover art");
                             assert!((pictures > 0), "No cover art was found in the file");
                         }
+                        Err(err) => {
+                            assert!(false, "Error: {:?}", err);
+                        }
+                    }
+                }
+                Err(err) => {
+                    assert!(false, "Error: File does not exist {:?}", err.to_string());
+                }
+            };
+        }
+
+        #[test]
+        fn test_remove_picture() {
+            let filename = util::get_filename(1);
+            let dir = String::from(util::TESTFILEDIRECTORY);
+
+            let temp_file = tempfile::tempdir().expect("Could not create test directory");
+            let test_dir = String::from(temp_file.path().to_str().unwrap());
+            let test_filename = String::from("track09.flac");
+            let new_filepath = get_full_path(&test_dir, &test_filename).unwrap();
+
+            match file_exists(&dir, &filename) {
+                Ok(_) => {
+                    let filepath = get_full_path(&dir, &filename).unwrap();
+
+                    match util::copy_file(&filepath, &new_filepath) {
+                        Ok(_o) => match coverart::remove_coverart(&new_filepath) {
+                            Ok(bytes) => {
+                                assert_eq!(false, bytes.is_empty(), "This should not be empty");
+                            }
+                            Err(err) => {
+                                assert!(false, "Error: {:?}", err);
+                            }
+                        },
                         Err(err) => {
                             assert!(false, "Error: {:?}", err);
                         }
