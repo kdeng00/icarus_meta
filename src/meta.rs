@@ -135,9 +135,11 @@ pub mod coverart {
 }
 
 pub mod metadata {
+    // TODO: Move this at the end after the non-std crates
     use crate::types;
     use lofty::file::AudioFile;
     use lofty::tag::Accessor;
+    use lofty::tag::TagExt;
 
     pub fn get_meta(t: types::Type, filepath: &String) -> Result<String, std::io::Error> {
         match std::fs::File::open(filepath) {
@@ -219,7 +221,14 @@ pub mod metadata {
                                 }
                             };
 
-                            Ok(value.to_owned())
+                            match vb.save_to_path(filepath, lofty::config::WriteOptions::default())
+                            {
+                                Ok(_) => Ok(value.to_owned()),
+                                Err(err) => Err(std::io::Error::new(
+                                    std::io::ErrorKind::InvalidData,
+                                    err.to_string(),
+                                )),
+                            }
                         }
                         None => Err(std::io::Error::new(
                             std::io::ErrorKind::InvalidData,
