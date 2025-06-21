@@ -244,6 +244,23 @@ pub mod metadata {
             Err(err) => Err(err),
         }
     }
+
+    pub fn parse_value(value: types::MetadataType) -> String {
+        match value {
+            types::MetadataType::String(val) => val,
+            types::MetadataType::Int(val) => val.to_string(),
+        }
+    }
+
+    pub fn set_meta_value(
+        t: types::Type,
+        filepath: &String,
+        value: types::MetadataType,
+    ) -> Result<String, std::io::Error> {
+        let parsed_val = parse_value(value);
+
+        set_meta(t, filepath, &parsed_val)
+    }
 }
 
 #[cfg(test)]
