@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum Type {
     Title,
     Artist,
@@ -11,8 +12,27 @@ pub enum Type {
     DiscCount,
 }
 
-pub mod access {
+#[derive(Debug)]
+pub enum MetadataType {
+    String(String),
+    Int(i32),
+}
 
+impl MetadataType {
+    pub fn from_std_str(s: &str) -> Self {
+        MetadataType::String(s.to_string())
+    }
+
+    pub fn from_string(s: String) -> Self {
+        MetadataType::String(s)
+    }
+
+    pub fn from_int(i: i32) -> Self {
+        MetadataType::Int(i)
+    }
+}
+
+pub mod access {
     pub fn get_type(t: super::Type) -> Result<String, std::io::Error> {
         match t {
             super::Type::Title => Ok("TITLE".to_owned()),
