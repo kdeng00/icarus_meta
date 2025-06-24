@@ -6,7 +6,6 @@ rust-version = "1.86"
 
 [dependencies]
 lofty = { version = "0.22.3" }
-icarus_models = { git = "ssh://git@git.kundeng.us/phoenix/icarus_models.git", tag = "v0.4.3" }
 
 [dev-dependencies]
 tempfile = { version = "3.19.1" }
