@@ -1,4 +1,4 @@
-// TODO: Have this derive Debug
+#[derive(Debug)]
 pub enum Type {
     Title,
     Artist,

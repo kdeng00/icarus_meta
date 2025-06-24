@@ -135,11 +135,11 @@ pub mod coverart {
 }
 
 pub mod metadata {
-    // TODO: Move this at the end after the non-std crates
-    use crate::types;
     use lofty::file::AudioFile;
     use lofty::tag::Accessor;
     use lofty::tag::TagExt;
+
+    use crate::types;
 
     pub fn get_meta(t: types::Type, filepath: &String) -> Result<String, std::io::Error> {
         match std::fs::File::open(filepath) {
