@@ -21,7 +21,17 @@ pub mod coverart {
                                 match lofty::picture::PictureInformation::from_picture(&pic) {
                                     Ok(info) => {
                                         flac_file.set_picture(0, pic.clone(), info);
-                                        Ok(pic.into_data())
+
+                                        match flac_file.save_to_path(
+                                            song_filepath,
+                                            lofty::config::WriteOptions::default(),
+                                        ) {
+                                            Ok(_) => Ok(pic.into_data()),
+                                            Err(err) => Err(std::io::Error::new(
+                                                std::io::ErrorKind::InvalidData,
+                                                err.to_string(),
+                                            )),
+                                        }
                                     }
                                     Err(err) => Err(std::io::Error::new(
                                         std::io::ErrorKind::InvalidData,
