@@ -275,83 +275,10 @@ pub mod metadata {
 
 #[cfg(test)]
 mod tests {
-    use util::{file_exists, get_full_path};
-
-    use super::*;
-
-    mod util {
-
-        use std::io::{self, Write};
-
-        // Function to save a Vec<u8> to a file
-        pub fn save_bytes_to_file(bytes: &[u8], file_path: &String) -> io::Result<()> {
-            let file = std::path::Path::new(file_path);
-            let mut file = std::fs::File::create(file)?;
-
-            match file.write_all(bytes) {
-                Ok(_res) => Ok(()),
-                Err(err) => Err(err),
-            }
-        }
-        pub fn get_full_path(
-            directory: &String,
-            filename: &String,
-        ) -> Result<String, std::io::Error> {
-            match path_buf(directory, filename) {
-                Ok(pf) => Ok(pf.display().to_string()),
-                Err(err) => Err(err),
-            }
-        }
-
-        pub fn copy_file(
-            source_path: &String,
-            destination_path: &String,
-        ) -> Result<u64, std::io::Error> {
-            let src_path = std::path::Path::new(source_path);
-            let dest_path = std::path::Path::new(destination_path);
-
-            match std::fs::copy(src_path, dest_path) {
-                Ok(bytes) => Ok(bytes),
-                Err(err) => Err(err),
-            }
-        }
-
-        pub fn file_exists(directory: &String, filename: &String) -> Result<bool, std::io::Error> {
-            match path_buf(directory, filename) {
-                Ok(pf) => Ok(pf.exists()),
-                Err(err) => Err(err),
-            }
-        }
-
-        fn path_buf(
-            directory: &String,
-            filename: &String,
-        ) -> Result<std::path::PathBuf, std::io::Error> {
-            let dir_path = std::path::Path::new(&directory);
-            Ok(dir_path.join(filename))
-        }
-
-        pub const TESTFILEDIRECTORY: &str = "tests/sample_tracks3";
-
-        pub fn get_filename(track: i32) -> String {
-            let mut filename = String::from("track");
-
-            if track < 10 {
-                filename += "0";
-                filename += &track.to_string();
-            } else {
-                filename += &track.to_string();
-            }
-
-            filename += ".flac";
-
-            filename
-        }
-    }
-
     mod get {
-        use super::metadata::get_meta;
-        use super::*;
+        use super::super::metadata::get_meta;
+        use crate::test_util::util;
+        use crate::test_util::util::{file_exists, get_full_path};
         use crate::types;
 
         #[test]
@@ -605,8 +532,9 @@ mod tests {
     }
 
     mod set {
-        use super::metadata::{get_meta, set_meta};
-        use super::*;
+        use super::super::metadata::{get_meta, set_meta};
+        use crate::test_util::util;
+        use crate::test_util::util::{file_exists, get_full_path};
         use crate::types;
 
         #[test]
@@ -1142,7 +1070,9 @@ mod tests {
 
     mod pictures {
 
-        use super::*;
+        use super::super::*;
+        use crate::test_util::util;
+        use crate::test_util::util::{file_exists, get_full_path};
 
         #[test]
         fn test_get_picture() {
