@@ -32,6 +32,21 @@ impl MetadataType {
     }
 }
 
+pub fn all_metadata_types() -> Vec<Type> {
+    vec![
+        Type::Album,
+        Type::Artist,
+        Type::AlbumArtist,
+        Type::Date,
+        Type::Disc,
+        Type::Genre,
+        Type::Title,
+        Type::Track,
+        Type::TrackCount,
+        Type::DiscCount,
+    ]
+}
+
 pub mod access {
     pub fn get_type(t: super::Type) -> Result<String, std::io::Error> {
         match t {
