@@ -1,6 +1,6 @@
 [package]
 name = "icarus_meta"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 rust-version = "1.88"
 
@@ -8,4 +8,4 @@ rust-version = "1.88"
 lofty = { version = "0.22.4" }
 
 [dev-dependencies]
-tempfile = { version = "3.20.0" }
+tempfile = { version = "3.23.0" }
