@@ -81,7 +81,7 @@ dependencies = [
 
 [[package]]
 name = "icarus_meta"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "lofty",
  "tempfile",

@@ -3,21 +3,21 @@ name: Release Tagging
 on:
   push:
     branches:
-      - devel
+      - main
 
 jobs:
   release:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Important for git describe --tags
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.88.0
+          toolchain: 1.90.0
           components: cargo
 
       - name: Extract Version from Cargo.toml
