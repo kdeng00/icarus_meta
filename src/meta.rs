@@ -544,7 +544,7 @@ mod tests {
 
             let temp_file = tempfile::tempdir().expect("Could not create test directory");
             let test_dir = String::from(temp_file.path().to_str().unwrap());
-            let test_filename = String::from("track08.flac");
+            let test_filename = util::generate_filename().unwrap();
             let new_filepath = test_dir + "/" + &test_filename;
 
             match file_exists(&dir, &filename) {
@@ -597,7 +597,7 @@ mod tests {
 
             let temp_file = tempfile::tempdir().expect("Could not create test directory");
             let test_dir = String::from(temp_file.path().to_str().unwrap());
-            let test_filename = String::from("track08.flac");
+            let test_filename = util::generate_filename().unwrap();
             let new_filepath = test_dir + "/" + &test_filename;
 
             match file_exists(&dir, &filename) {
@@ -806,7 +806,7 @@ mod tests {
 
             let temp_file = tempfile::tempdir().expect("Could not create test directory");
             let test_dir = String::from(temp_file.path().to_str().unwrap());
-            let test_filename = String::from("track08.flac");
+            let test_filename = util::generate_filename().unwrap();
             let new_filepath = test_dir + "/" + &test_filename;
 
             match file_exists(&dir, &filename) {
@@ -907,7 +907,7 @@ mod tests {
 
             let temp_file = tempfile::tempdir().expect("Could not create test directory");
             let test_dir = String::from(temp_file.path().to_str().unwrap());
-            let test_filename = String::from("track08.flac");
+            let test_filename = util::generate_filename().unwrap();
             let new_filepath = test_dir + "/" + &test_filename;
 
             match file_exists(&dir, &filename) {
@@ -1021,7 +1021,7 @@ mod tests {
 
             let temp_file = tempfile::tempdir().expect("Could not create test directory");
             let test_dir = String::from(temp_file.path().to_str().unwrap());
-            let test_filename = String::from("track08.flac");
+            let test_filename = util::generate_filename().unwrap();
             let new_filepath = test_dir + "/" + &test_filename;
 
             match file_exists(&dir, &filename) {

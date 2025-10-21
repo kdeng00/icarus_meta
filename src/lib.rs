@@ -1,3 +1,4 @@
+pub mod detection;
 pub mod meta;
 pub mod properties;
 pub mod types;
@@ -5,6 +6,8 @@ pub mod types;
 pub mod test_util {
     pub mod util {
         use std::io::{self, Write};
+
+        use rand::Rng;
 
         // Function to save a Vec<u8> to a file
         pub fn save_bytes_to_file(bytes: &[u8], file_path: &String) -> io::Result<()> {
@@ -41,6 +44,25 @@ pub mod test_util {
                 Ok(pf) => Ok(pf.exists()),
                 Err(err) => Err(err),
             }
+        }
+
+        pub fn generate_filename() -> Result<String, std::io::Error> {
+            let mut filename = String::from("track-");
+            let length = 20;
+            let characters = "abcdef0123456789";
+            let amount_of_characters = characters.len() - 1;
+            let mut rng = rand::rng();
+
+            for _ in 0..length {
+                let index = rng.random_range(0..=amount_of_characters);
+                let random_c = characters.chars().nth(index);
+
+                if let Some(c) = random_c {
+                    filename.push(c);
+                }
+            }
+
+            Ok(format!("{filename}.flac"))
         }
 
         fn path_buf(
