@@ -5,7 +5,7 @@ pub mod types;
 
 pub mod test_util {
     pub mod util {
-        use std::io::{self, Write};
+        use std::io::{self, Read, Write};
 
         use rand::Rng;
 
@@ -37,6 +37,19 @@ pub mod test_util {
             let dest_path = std::path::Path::new(destination_path);
 
             std::fs::copy(src_path, dest_path)
+        }
+
+        pub fn get_data_from_file(source_path: &str) -> Result<Vec<u8>, std::io::Error> {
+            match std::fs::File::open(source_path) {
+                Ok(mut file) => {
+                    let mut data: Vec<u8> = Vec::new();
+                    match file.read_to_end(&mut data) {
+                        Ok(_) => Ok(data),
+                        Err(err) => Err(err),
+                    }
+                }
+                Err(err) => Err(err),
+            }
         }
 
         pub fn file_exists(directory: &String, filename: &String) -> Result<bool, std::io::Error> {
