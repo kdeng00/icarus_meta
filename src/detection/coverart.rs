@@ -4,11 +4,11 @@ pub fn file_type_from_filepath(
 ) -> Result<crate::detection::FileType, std::io::Error> {
     match imghdr::from_file(filepath) {
         Ok(Some(imghdr::Type::Jpeg)) => Ok(crate::detection::FileType {
-            mime: String::from("image/jpeg"),
+            mime: String::from(constants::mime::JPEG),
             file_type: String::from(constants::JPEG_TYPE),
         }),
         Ok(Some(imghdr::Type::Png)) => Ok(crate::detection::FileType {
-            mime: String::from("image/png"),
+            mime: String::from(constants::mime::PNG),
             file_type: String::from(constants::PNG_TYPE),
         }),
         Ok(None) => Err(std::io::Error::other("Image file not supported")),
@@ -21,11 +21,11 @@ pub fn file_type_from_filepath(
 pub fn file_type_from_data(data: &Vec<u8>) -> Result<crate::detection::FileType, std::io::Error> {
     match imghdr::from_bytes(data) {
         Some(imghdr::Type::Jpeg) => Ok(crate::detection::FileType {
-            mime: String::from("image/jpeg"),
+            mime: String::from(constants::mime::JPEG),
             file_type: String::from(constants::JPEG_TYPE),
         }),
         Some(imghdr::Type::Png) => Ok(crate::detection::FileType {
-            mime: String::from("image/png"),
+            mime: String::from(constants::mime::PNG),
             file_type: String::from(constants::PNG_TYPE),
         }),
         None => Err(std::io::Error::other("Image file not supported")),
@@ -37,6 +37,11 @@ pub mod constants {
     pub const PNG_TYPE: &str = "png";
     pub const JPEG_TYPE: &str = "jpeg";
     pub const JPG_TYPE: &str = "jpg";
+
+    pub mod mime {
+        pub const JPEG: &str = "image/jpeg";
+        pub const PNG: &str = "image/png";
+    }
 }
 
 #[cfg(test)]
