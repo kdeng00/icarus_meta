@@ -27,15 +27,13 @@ pub fn file_type_from_data(data: &Vec<u8>) -> Result<crate::detection::FileType,
             if mime == constants::mime::FLAC {
                 Ok(crate::detection::FileType {
                     mime: String::from(mime),
-                    file_type: String::from(constants::FLAC_TYPE)
+                    file_type: String::from(constants::FLAC_TYPE),
                 })
             } else {
                 Err(std::io::Error::other("Unsupported file type"))
             }
         }
-        None => {
-            Err(std::io::Error::other("File type not determined"))
-        }
+        None => Err(std::io::Error::other("File type not determined")),
     }
 }
 
@@ -57,7 +55,11 @@ mod tests {
 
         match super::file_type_from_filepath(&filepath) {
             Ok(filetype) => {
-                assert_eq!(filetype.file_type, crate::detection::song::constants::FLAC_TYPE, "Types do not match")
+                assert_eq!(
+                    filetype.file_type,
+                    crate::detection::song::constants::FLAC_TYPE,
+                    "Types do not match"
+                )
             }
             Err(err) => {
                 assert!(false, "Error: {err:?}")
@@ -74,12 +76,15 @@ mod tests {
 
         match super::file_type_from_data(&data) {
             Ok(filetype) => {
-                assert_eq!(filetype.file_type, crate::detection::song::constants::FLAC_TYPE, "Types do not match")
+                assert_eq!(
+                    filetype.file_type,
+                    crate::detection::song::constants::FLAC_TYPE,
+                    "Types do not match"
+                )
             }
             Err(err) => {
                 assert!(false, "Error: {err:?}")
             }
         }
     }
-
 }
