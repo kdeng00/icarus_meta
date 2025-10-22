@@ -13,3 +13,7 @@ pub fn file_type_from_filepath(filepath: &str) -> Result<String, std::io::Error>
         }
     }
 }
+
+pub mod constants {
+    pub const FLAC_TYPE: &str = "flac";
+}
