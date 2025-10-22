@@ -1,8 +1,9 @@
 /// Gets the file type of a CoverArt given it's path
-pub fn file_type_from_filepath(filepath: &str) -> Result<String, std::io::Error> {
+pub fn file_type_from_filepath(filepath: &str) -> Result<crate::detection::FileType, std::io::Error> {
     match imghdr::from_file(filepath) {
-        Ok(Some(imghdr::Type::Jpeg)) => Ok(String::from(constants::JPEG_TYPE)),
-        Ok(Some(imghdr::Type::Png)) => Ok(String::from(constants::PNG_TYPE)),
+        Ok(Some(imghdr::Type::Jpeg)) => Ok(crate::detection::FileType {mime: String::from("image/jpeg"), file_type: String::from(constants::JPEG_TYPE)}),
+        Ok(Some(imghdr::Type::Png)) => Ok(crate::detection::FileType {mime: String::from("image/png"),
+        file_type: String::from(constants::PNG_TYPE)}),
         Ok(None) => Err(std::io::Error::other("Image file not supported")),
         Err(err) => Err(err),
         _ => Err(std::io::Error::other("Image file not supported")),
@@ -10,10 +11,11 @@ pub fn file_type_from_filepath(filepath: &str) -> Result<String, std::io::Error>
 }
 
 /// Gets the file type of a CoverArt given it's data
-pub fn file_type_from_data(data: &Vec<u8>) -> Result<String, std::io::Error> {
+pub fn file_type_from_data(data: &Vec<u8>) -> Result<crate::detection::FileType, std::io::Error> {
     match imghdr::from_bytes(data) {
-        Some(imghdr::Type::Jpeg) => Ok(String::from(constants::JPEG_TYPE)),
-        Some(imghdr::Type::Png) => Ok(String::from(constants::PNG_TYPE)),
+        Some(imghdr::Type::Jpeg) => Ok(crate::detection::FileType {mime: String::from("image/jpeg"), file_type: String::from(constants::JPEG_TYPE)}),
+        Some(imghdr::Type::Png) => Ok(crate::detection::FileType {mime: String::from("image/png"),
+        file_type: String::from(constants::PNG_TYPE)}),
         None => Err(std::io::Error::other("Image file not supported")),
         _ => Err(std::io::Error::other("Image file not supported")),
     }
@@ -38,7 +40,7 @@ mod tests {
         match super::file_type_from_filepath(&filepath) {
             Ok(filetype) => {
                 assert_eq!(
-                    filetype, super::constants::PNG_TYPE,
+                    filetype.file_type, super::constants::PNG_TYPE,
                     "The file type of the CoverArt should have been png"
                 );
             }
@@ -58,7 +60,7 @@ mod tests {
         match super::file_type_from_data(&data) {
             Ok(filetype) => {
                 assert_eq!(
-                    filetype, super::constants::PNG_TYPE,
+                    filetype.file_type, super::constants::PNG_TYPE,
                     "The file type of the CoverArt should have been png"
                 );
             }
