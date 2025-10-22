@@ -64,4 +64,22 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_song_file_type_from_data() {
+        let directory = String::from(crate::test_util::util::TESTFILEDIRECTORY);
+        let filename = String::from("track01.flac");
+        let filepath = format!("{directory}/{filename}");
+        let data = crate::test_util::util::get_data_from_file(&filepath).unwrap();
+
+        match super::file_type_from_data(&data) {
+            Ok(filetype) => {
+                assert_eq!(filetype.file_type, crate::detection::song::constants::FLAC_TYPE, "Types do not match")
+            }
+            Err(err) => {
+                assert!(false, "Error: {err:?}")
+            }
+        }
+    }
+
 }
