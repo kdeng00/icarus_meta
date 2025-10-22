@@ -20,7 +20,7 @@ pub fn file_type_from_filepath(
 }
 
 /// Gets the file type of a Song given it's data
-pub fn file_type_from_data(data: &Vec<u8>) -> Result<crate::detection::FileType, std::io::Error> {
+pub fn file_type_from_data(data: &[u8]) -> Result<crate::detection::FileType, std::io::Error> {
     match infer::get(data) {
         Some(kind) => {
             let mime = kind.mime_type();
