@@ -19,11 +19,13 @@ pub fn file_type_from_data(data: &Vec<u8>) -> Result<String, std::io::Error> {
     }
 }
 
+
 pub mod constants {
     pub const PNG_TYPE: &str = "png";
     pub const JPEG_TYPE: &str = "jpeg";
     pub const JPG_TYPE: &str = "jpg";
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -36,7 +38,7 @@ mod tests {
         match super::file_type_from_filepath(&filepath) {
             Ok(filetype) => {
                 assert_eq!(
-                    filetype, "png",
+                    filetype, super::constants::PNG_TYPE,
                     "The file type of the CoverArt should have been png"
                 );
             }
@@ -56,7 +58,7 @@ mod tests {
         match super::file_type_from_data(&data) {
             Ok(filetype) => {
                 assert_eq!(
-                    filetype, "png",
+                    filetype, super::constants::PNG_TYPE,
                     "The file type of the CoverArt should have been png"
                 );
             }
