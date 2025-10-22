@@ -21,3 +21,22 @@ pub fn file_type_from_filepath(
 pub mod constants {
     pub const FLAC_TYPE: &str = "flac";
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_song_file_type() {
+        let directory = String::from(crate::test_util::util::TESTFILEDIRECTORY);
+        let filename = String::from("track01.flac");
+        let filepath = format!("{directory}/{filename}");
+
+        match super::file_type_from_filepath(&filepath) {
+            Ok(filetype) => {
+                assert_eq!(filetype.file_type, crate::detection::song::constants::FLAC_TYPE, "Types do not match")
+            }
+            Err(err) => {
+                assert!(false, "Error: {err:?}")
+            }
+        }
+    }
+}
