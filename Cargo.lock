@@ -104,7 +104,7 @@ dependencies = [
 
 [[package]]
 name = "icarus_meta"
-version = "0.4.4"
+version = "0.4.5"
 dependencies = [
  "imghdr",
  "infer",
