@@ -70,4 +70,47 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_song_properties() {
+        let filename = test_util::util::get_filename(1);
+        let dir = String::from(test_util::util::TESTFILEDIRECTORY);
+
+        match test_util::util::file_exists(&dir, &filename) {
+            Ok(_) => {
+                let filepath = test_util::util::get_full_path(&dir, &filename).unwrap();
+                match super::get_song_properties(&filepath) {
+                    Ok(song_properties) => {
+                        let song_duration: u64 = 41;
+                        let bitrate: u32 = 1;
+                        let overall_bitrate: u32 = 3;
+                        let bit_depth: u8 = 24;
+                        let channels: u8 = 2;
+
+                        let fetched_song_duration = song_properties.duration.as_secs();
+                        let fetched_bitrate = song_properties.bitrate;
+                        let fetched_overall_bitrate = song_properties.overall_bitrate;
+                        let fetched_bit_depth = song_properties.bit_depth;
+                        let fetched_channels = song_properties.channels;
+
+                        assert_eq!(
+                            song_duration, fetched_song_duration,
+                            "Durations should match, but they don't {song_duration} {fetched_song_duration} ({song_properties:?})"
+                        );
+
+                        assert_eq!(bitrate, fetched_bitrate, "Bitrates do not match {bitrate:?} {fetched_bitrate:?} {song_properties:?}");
+                        assert_eq!(overall_bitrate, fetched_overall_bitrate, "Overall bitrates do not match {overall_bitrate:?} {fetched_overall_bitrate:?} {song_properties:?}");
+                        assert_eq!(bit_depth, fetched_bit_depth, "Bit depth do not match {bit_depth:?} {fetched_bit_depth:?} {song_properties:?}");
+                        assert_eq!(channels, fetched_channels, "Channels do not match {channels:?} {fetched_channels:?} {song_properties:?}");
+                    }
+                    Err(err) => {
+                        assert!(false, "Error: {err:?}");
+                    }
+                }
+            }
+            Err(err) => {
+                assert!(false, "Error: {err:?}");
+            }
+        }
+    }
 }
