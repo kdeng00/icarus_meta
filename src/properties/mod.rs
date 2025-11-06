@@ -43,16 +43,25 @@ mod tests {
         match test_util::util::file_exists(&dir, &filename) {
             Ok(_) => {
                 let filepath = test_util::util::get_full_path(&dir, &filename).unwrap();
-                match super::get_duration(&filepath) {
-                    Ok(duration) => {
-                        let song_duration: u64 = 41;
-                        let fetched_song_duration = duration.as_secs();
+                let new_filepath = test_util::util::generate_newfilepath(&dir).unwrap();
 
-                        assert_eq!(
-                            song_duration, fetched_song_duration,
-                            "Durations should match, but they don't {song_duration} {fetched_song_duration} ({duration:?})"
-                        );
-                    }
+                match test_util::util::copy_file(&filepath, &new_filepath) {
+                    Ok(_) => match super::get_duration(&new_filepath) {
+                        Ok(duration) => {
+                            test_util::util::remove_file(&new_filepath).unwrap();
+
+                            let song_duration: u64 = 41;
+                            let fetched_song_duration = duration.as_secs();
+
+                            assert_eq!(
+                                song_duration, fetched_song_duration,
+                                "Durations should match, but they don't {song_duration} {fetched_song_duration} ({duration:?})"
+                            );
+                        }
+                        Err(err) => {
+                            assert!(false, "Error: {err:?}");
+                        }
+                    },
                     Err(err) => {
                         assert!(false, "Error: {err:?}");
                     }
@@ -75,8 +84,10 @@ mod tests {
                 let new_filepath = test_util::util::generate_newfilepath(&dir).unwrap();
 
                 match test_util::util::copy_file(&filepath, &new_filepath) {
-                    Ok(_) => match super::get_song_properties(&filepath) {
+                    Ok(_) => match super::get_song_properties(&new_filepath) {
                         Ok(song_properties) => {
+                            test_util::util::remove_file(&new_filepath).unwrap();
+
                             let song_duration: u64 = 41;
                             let bitrate: u32 = 1;
                             let overall_bitrate: u32 = 3;
