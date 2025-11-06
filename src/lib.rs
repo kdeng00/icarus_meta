@@ -19,10 +19,7 @@ pub mod test_util {
                 Err(err) => Err(err),
             }
         }
-        pub fn get_full_path(
-            directory: &String,
-            filename: &String,
-        ) -> Result<String, std::io::Error> {
+        pub fn get_full_path(directory: &str, filename: &str) -> Result<String, std::io::Error> {
             match path_buf(directory, filename) {
                 Ok(pf) => Ok(pf.display().to_string()),
                 Err(err) => Err(err),
@@ -39,6 +36,12 @@ pub mod test_util {
             std::fs::copy(src_path, dest_path)
         }
 
+        pub fn remove_file(filepath: &str) -> Result<(), std::io::Error> {
+            let f_path = std::path::Path::new(filepath);
+
+            std::fs::remove_file(f_path)
+        }
+
         pub fn get_data_from_file(source_path: &str) -> Result<Vec<u8>, std::io::Error> {
             match std::fs::File::open(source_path) {
                 Ok(mut file) => {
@@ -52,9 +55,19 @@ pub mod test_util {
             }
         }
 
-        pub fn file_exists(directory: &String, filename: &String) -> Result<bool, std::io::Error> {
+        pub fn file_exists(directory: &str, filename: &str) -> Result<bool, std::io::Error> {
             match path_buf(directory, filename) {
                 Ok(pf) => Ok(pf.exists()),
+                Err(err) => Err(err),
+            }
+        }
+
+        pub fn generate_newfilepath(directory: &str) -> Result<String, std::io::Error> {
+            match generate_filename() {
+                Ok(filename) => match get_full_path(directory, &filename) {
+                    Ok(filepath) => Ok(filepath),
+                    Err(err) => Err(err),
+                },
                 Err(err) => Err(err),
             }
         }
@@ -78,10 +91,7 @@ pub mod test_util {
             Ok(format!("{filename}.flac"))
         }
 
-        fn path_buf(
-            directory: &String,
-            filename: &String,
-        ) -> Result<std::path::PathBuf, std::io::Error> {
+        fn path_buf(directory: &str, filename: &str) -> Result<std::path::PathBuf, std::io::Error> {
             let dir_path = std::path::Path::new(&directory);
             Ok(dir_path.join(filename))
         }
