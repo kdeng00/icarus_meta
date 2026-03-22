@@ -2,7 +2,7 @@
 name = "icarus_meta"
 version = "0.4.5"
 edition = "2024"
-rust-version = "1.90"
+rust-version = "1.94"
 
 [dependencies]
 lofty = { version = "0.22.4" }
