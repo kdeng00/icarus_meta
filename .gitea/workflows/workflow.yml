@@ -11,7 +11,7 @@ on:
 jobs:
   check:
     name: Check
-    runs-on: ubuntu-24.04
+    runs-on: debian-13
     steps:
       - uses: actions/checkout@v5
       - uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -28,7 +28,7 @@ jobs:
 
   test:
     name: Test Suite
-    runs-on: ubuntu-24.04
+    runs-on: debian-13
     needs: setup_ssh
     steps:
       - uses: actions/checkout@v5
@@ -46,7 +46,7 @@ jobs:
 
   fmt:
     name: Rustfmt
-    runs-on: ubuntu-24.04
+    runs-on: debian-13
     needs: setup_ssh
     steps:
       - uses: actions/checkout@v5
@@ -65,7 +65,7 @@ jobs:
 
   clippy:
     name: Clippy
-    runs-on: ubuntu-24.04
+    runs-on: debian-13
     needs: setup_ssh
     steps:
       - uses: actions/checkout@v5
@@ -84,7 +84,7 @@ jobs:
 
   build:
     name: build
-    runs-on: ubuntu-24.04
+    runs-on: debian-13
     needs: setup_ssh
     steps:
       - uses: actions/checkout@v5
